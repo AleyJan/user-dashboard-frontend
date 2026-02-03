@@ -3,15 +3,26 @@ import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
+  const [error, setError] = useState("");
+
+  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app"; // ✅ deployed backend
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/users", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => setUsers(res.data));
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setUsers(res.data);
+      } catch (err) {
+        console.log(err);
+        setError("Failed to fetch users");
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const logout = () => {
@@ -58,7 +69,7 @@ export default function Dashboard() {
               </thead>
 
               <tbody className="divide-y">
-                {users.map((u, index) => (
+                {users.map((u) => (
                   <tr key={u._id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4 font-medium text-gray-800">
                       {u.username}
@@ -72,10 +83,14 @@ export default function Dashboard() {
               </tbody>
             </table>
 
-            {users.length === 0 && (
+            {users.length === 0 && !error && (
               <div className="text-center py-8 text-gray-500">
                 No users found
               </div>
+            )}
+
+            {error && (
+              <div className="text-center py-8 text-red-600">{error}</div>
             )}
           </div>
         </div>

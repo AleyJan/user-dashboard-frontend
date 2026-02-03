@@ -14,6 +14,8 @@ export default function Register() {
 
   const navigate = useNavigate();
 
+  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app"; // ✅ deployed backend
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -27,17 +29,17 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", form);
+      await axios.post(`${BASE_URL}/api/auth/register`, form);
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.msg || "Something went wrong");
+      setError(err.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 px-4">
       <form
         onSubmit={submit}
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
@@ -53,6 +55,7 @@ export default function Register() {
           </div>
         )}
 
+        {/* Username */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-600 mb-1">
             Username
@@ -66,6 +69,7 @@ export default function Register() {
           />
         </div>
 
+        {/* Email */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-600 mb-1">
             Email
@@ -79,11 +83,11 @@ export default function Register() {
           />
         </div>
 
+        {/* Password */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-600 mb-1">
             Password
           </label>
-
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -92,7 +96,6 @@ export default function Register() {
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
-
             <span
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-2.5 cursor-pointer text-sm text-gray-600"
@@ -102,6 +105,7 @@ export default function Register() {
           </div>
         </div>
 
+        {/* Register Button */}
         <button
           type="submit"
           disabled={loading}
@@ -110,6 +114,7 @@ export default function Register() {
           {loading ? "Registering..." : "Register"}
         </button>
 
+        {/* Footer */}
         <p className="text-sm text-center text-gray-600 mt-4">
           Already have an account?{" "}
           <span

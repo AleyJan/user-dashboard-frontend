@@ -1,16 +1,16 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
+  // Check if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -18,16 +18,15 @@ export default function Login() {
     }
   }, [navigate]);
 
+  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app"; // ✅ deployed backend
+
   const submit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form,
-      );
+      const res = await axios.post(`${BASE_URL}/api/auth/login`, form);
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
@@ -84,7 +83,6 @@ export default function Login() {
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
-
             <span
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-2.5 cursor-pointer text-sm text-gray-600"
@@ -94,7 +92,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Button */}
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
