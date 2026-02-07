@@ -1,5 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {
+  FiLogOut,
+  FiPlus,
+  FiTrash2,
+  FiCheckCircle,
+  FiCircle,
+  FiUser,
+} from "react-icons/fi"; // Optional: npm install react-icons
 
 export default function Todo() {
   const [todos, setTodos] = useState([]);
@@ -9,27 +17,23 @@ export default function Todo() {
   const [user, setUser] = useState(null);
 
   const token = localStorage.getItem("token");
-
   const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
 
   const authHeader = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   };
 
-  // Fetch user info & todos
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const todosRes = await axios.get(`${BASE_URL}/api/todos`, authHeader);
+        const [todosRes, userRes] = await Promise.all([
+          axios.get(`${BASE_URL}/api/todos`, authHeader),
+          axios.get(`${BASE_URL}/api/users/me`, authHeader),
+        ]);
         setTodos(todosRes.data);
-
-        const userRes = await axios.get(`${BASE_URL}/api/users/me`, authHeader);
         setUser(userRes.data);
       } catch (err) {
-        console.log(err);
-        setError("Failed to fetch data");
+        setError("Session expired or server error");
       }
     };
     fetchData();
@@ -47,8 +51,7 @@ export default function Todo() {
       setTodos([...todos, res.data]);
       setText("");
     } catch (err) {
-      console.log(err);
-      setError("Failed to add todo");
+      setError("Failed to add task");
     } finally {
       setLoading(false);
     }
@@ -63,8 +66,7 @@ export default function Todo() {
       );
       setTodos(todos.map((t) => (t._id === id ? res.data : t)));
     } catch (err) {
-      console.log(err);
-      setError("Failed to toggle todo");
+      setError("Update failed");
     }
   };
 
@@ -73,8 +75,7 @@ export default function Todo() {
       await axios.delete(`${BASE_URL}/api/todos/${id}`, authHeader);
       setTodos(todos.filter((t) => t._id !== id));
     } catch (err) {
-      console.log(err);
-      setError("Failed to delete todo");
+      setError("Delete failed");
     }
   };
 
@@ -84,81 +85,142 @@ export default function Todo() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-blue-600 text-white flex flex-col md:flex-row justify-between items-center p-4 shadow gap-2 md:gap-0">
-        <h1 className="text-xl font-bold">Todo App</h1>
-        {user && <span className="md:mr-4">Welcome: {user.username}</span>}
-        <button
-          onClick={logout}
-          className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 active:bg-red-300"
-        >
-          Logout
-        </button>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto p-6 flex flex-col md:flex-row gap-6">
-        {/* Todo List - Left */}
-        <ul className="flex-1 space-y-2">
-          {todos.length === 0 ? (
-            <div className="text-center py-20 text-gray-400 text-lg font-medium">
-              No todos added yet
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      {/* Navbar */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-indigo-600 p-2 rounded-lg">
+              <FiCheckCircle className="text-white text-xl" />
             </div>
-          ) : (
-            todos.map((todo) => (
-              <li
-                key={todo._id}
-                className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded shadow gap-2 sm:gap-0"
+            <span className="text-xl font-bold tracking-tight text-slate-800 uppercase">
+              TRACKER
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full text-sm font-medium">
+                <FiUser />
+                {user.username}
+              </div>
+            )}
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition-all"
+            >
+              <FiLogOut />
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-6xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left/Top */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-bold mb-4 text-slate-800">
+              Create Task
+            </h2>
+            {error && (
+              <div className="mb-4 text-xs font-medium text-red-500 bg-red-50 p-3 rounded-lg border border-red-100">
+                {error}
+              </div>
+            )}
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="What needs to be done?"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addTodo()}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400"
+              />
+              <button
+                onClick={addTodo}
+                disabled={loading || !text.trim()}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"
               >
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => toggleTodo(todo._id)}
-                    className="w-5 h-5"
-                  />
-                  <span
-                    className={
-                      todo.completed ? "line-through text-gray-400" : ""
-                    }
-                  >
-                    {todo.title}
-                  </span>
-                </div>
-                <button
-                  onClick={() => deleteTodo(todo._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 active:bg-red-300 self-end sm:self-auto"
-                >
-                  Delete
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-
-        {/* Add Todo - Right */}
-        <div className="w-full md:w-80 mt-4 md:mt-0">
-          <h2 className="text-lg font-semibold mb-4">Add New Todo</h2>
-          {error && (
-            <div className="mb-4 text-sm text-red-600 bg-red-100 p-3 rounded">
-              {error}
+                {loading ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <FiPlus /> Add Task
+                  </>
+                )}
+              </button>
             </div>
-          )}
-          <input
-            type="text"
-            placeholder="Enter new todo"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-          />
-          <button
-            onClick={addTodo}
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? "Adding..." : "Add Todo"}
-          </button>
+          </div>
+
+          {/* Status*/}
+          <div className="bg-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-indigo-100">
+            <p className="opacity-80 text-sm font-medium">Task Progress</p>
+            <h3 className="text-3xl font-bold mt-1">
+              {todos.filter((t) => t.completed).length} / {todos.length}
+            </h3>
+            <div className="w-full bg-indigo-700/50 h-2 rounded-full mt-4 overflow-hidden">
+              <div
+                className="bg-white h-full transition-all duration-500"
+                style={{
+                  width: `${todos.length ? (todos.filter((t) => t.completed).length / todos.length) * 100 : 0}%`,
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right/Bottom */}
+        <div className="lg:col-span-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-slate-800">
+              Your Daily Tasks
+            </h2>
+            <span className="text-sm font-medium text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
+              {todos.length} Total
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {todos.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl py-20 flex flex-col items-center justify-center text-slate-400">
+                <FiCheckCircle size={48} className="mb-4 opacity-20" />
+                <p className="text-lg font-medium">
+                  All clear! Enjoy your day.
+                </p>
+              </div>
+            ) : (
+              todos.map((todo) => (
+                <div
+                  key={todo._id}
+                  className={`group bg-white flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all ${todo.completed ? "bg-slate-50/50" : ""}`}
+                >
+                  <div
+                    className="flex items-center gap-4 flex-1 cursor-pointer"
+                    onClick={() => toggleTodo(todo._id)}
+                  >
+                    <button
+                      className={`text-2xl transition-colors ${todo.completed ? "text-indigo-500" : "text-slate-300"}`}
+                    >
+                      {todo.completed ? <FiCheckCircle /> : <FiCircle />}
+                    </button>
+                    <span
+                      className={`font-medium transition-all ${todo.completed ? "line-through text-slate-400" : "text-slate-700"}`}
+                    >
+                      {todo.title}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => deleteTodo(todo._id)}
+                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </main>
     </div>
