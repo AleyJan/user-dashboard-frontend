@@ -91,7 +91,7 @@ export default function Todo() {
         {user && <span className="md:mr-4">Welcome: {user.username}</span>}
         <button
           onClick={logout}
-          className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+          className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 active:bg-red-300"
         >
           Logout
         </button>
@@ -101,32 +101,40 @@ export default function Todo() {
       <main className="max-w-5xl mx-auto p-6 flex flex-col md:flex-row gap-6">
         {/* Todo List - Left */}
         <ul className="flex-1 space-y-2">
-          {todos.map((todo) => (
-            <li
-              key={todo._id}
-              className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded shadow gap-2 sm:gap-0"
-            >
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleTodo(todo._id)}
-                  className="w-5 h-5"
-                />
-                <span
-                  className={todo.completed ? "line-through text-gray-400" : ""}
-                >
-                  {todo.title}
-                </span>
-              </div>
-              <button
-                onClick={() => deleteTodo(todo._id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 self-end sm:self-auto"
+          {todos.length === 0 ? (
+            <div className="text-center py-20 text-gray-400 text-lg font-medium">
+              No todos added yet
+            </div>
+          ) : (
+            todos.map((todo) => (
+              <li
+                key={todo._id}
+                className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded shadow gap-2 sm:gap-0"
               >
-                Delete
-              </button>
-            </li>
-          ))}
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={todo.completed}
+                    onChange={() => toggleTodo(todo._id)}
+                    className="w-5 h-5"
+                  />
+                  <span
+                    className={
+                      todo.completed ? "line-through text-gray-400" : ""
+                    }
+                  >
+                    {todo.title}
+                  </span>
+                </div>
+                <button
+                  onClick={() => deleteTodo(todo._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 active:bg-red-300 self-end sm:self-auto"
+                >
+                  Delete
+                </button>
+              </li>
+            ))
+          )}
         </ul>
 
         {/* Add Todo - Right */}

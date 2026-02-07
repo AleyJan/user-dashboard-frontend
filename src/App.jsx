@@ -5,34 +5,30 @@ import Todo from "./pages/Todo";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  const token = localStorage.getItem("token");
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root route → auto redirect */}
         <Route
           path="/"
-          element={
-            localStorage.getItem("token") ? (
-              <Navigate to="/dashboard" />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
+          element={<Navigate to={token ? "/dashboard" : "/login"} />}
         />
 
-        {/* Public routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Protected route */}
         <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Todo />
-            </ProtectedRoute>
-          }
+          path="/login"
+          element={token ? <Navigate to="/dashboard" /> : <Login />}
         />
+        <Route
+          path="/register"
+          element={token ? <Navigate to="/dashboard" /> : <Register />}
+        />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Todo />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );
