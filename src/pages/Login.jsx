@@ -19,17 +19,18 @@ export default function Login() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
+  const BASE_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://user-dashboard-backend-jade.vercel.app";
 
   useEffect(() => {
-    // 1. Check if user is already logged in
     const token = localStorage.getItem("token");
     if (token) navigate("/dashboard", { replace: true });
 
-    // 2. Check for success message from Register page
     if (location.state?.successMsg) {
       setSuccess(location.state.successMsg);
-      // Clean up the state so message disappears on refresh
+
       window.history.replaceState({}, document.title);
     }
   }, [navigate, location]);
@@ -37,7 +38,7 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess(""); // Clear success message if user tries to log in again
+    setSuccess("");
     setLoading(true);
 
     try {
@@ -45,7 +46,6 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      // Handles the "msg" field from your backend
       setError(err.response?.data?.msg || "Invalid email or password");
     } finally {
       setLoading(false);
@@ -56,21 +56,22 @@ export default function Login() {
     <div className="h-screen w-screen flex items-center justify-center bg-slate-50 px-4 overflow-hidden">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="flex items-center gap-3 mb-3 ml-1">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-100 mb-3">
             <FiCheckCircle className="text-white text-2xl" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Welcome Back
-          </h2>
-          <p className="text-slate-500 text-sm font-medium">
-            Sign in to your account
-          </p>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 leading-tight">
+              Welcome Back
+            </h2>
+            <p className="text-[10px] text-slate-500 font-bold  tracking-widest">
+              Sign in to your account
+            </p>
+          </div>
         </div>
 
         {/* Card */}
         <div className="bg-white p-7 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-          {/* Success Message Alert */}
           {success && (
             <div className="mb-4 text-xs font-bold text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-center gap-2 animate-pulse">
               <FiCheckCircle className="text-emerald-500" />
@@ -78,7 +79,6 @@ export default function Login() {
             </div>
           )}
 
-          {/* Error Message Alert */}
           {error && (
             <div className="mb-4 text-xs font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>

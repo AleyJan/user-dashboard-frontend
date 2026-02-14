@@ -7,7 +7,7 @@ import {
   FiCheckCircle,
   FiCircle,
   FiUser,
-} from "react-icons/fi"; // Optional: npm install react-icons
+} from "react-icons/fi";
 
 export default function Todo() {
   const [todos, setTodos] = useState([]);
@@ -17,7 +17,10 @@ export default function Todo() {
   const [user, setUser] = useState(null);
 
   const token = localStorage.getItem("token");
-  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
+  const BASE_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://user-dashboard-backend-jade.vercel.app";
 
   const authHeader = {
     headers: { Authorization: `Bearer ${token}` },
@@ -101,7 +104,15 @@ export default function Todo() {
           <div className="flex items-center gap-4">
             {user && (
               <div className="hidden sm:flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full text-sm font-medium">
-                <FiUser />
+                {user.profilePic ? (
+                  <img
+                    src={user.profilePic}
+                    alt="User"
+                    className="w-6 h-6 rounded-full object-cover shadow-sm"
+                  />
+                ) : (
+                  <FiUser />
+                )}
                 {user.username}
               </div>
             )}
@@ -117,7 +128,6 @@ export default function Todo() {
       </nav>
 
       <main className="max-w-6xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left/Top */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <h2 className="text-lg font-bold mb-4 text-slate-800">
@@ -153,7 +163,6 @@ export default function Todo() {
             </div>
           </div>
 
-          {/* Status*/}
           <div className="bg-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-indigo-100">
             <p className="opacity-80 text-sm font-medium">Task Progress</p>
             <h3 className="text-3xl font-bold mt-1">
@@ -170,7 +179,6 @@ export default function Todo() {
           </div>
         </div>
 
-        {/* Right/Bottom */}
         <div className="lg:col-span-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-800">
@@ -210,7 +218,6 @@ export default function Todo() {
                       {todo.title}
                     </span>
                   </div>
-
                   <button
                     onClick={() => deleteTodo(todo._id)}
                     className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
