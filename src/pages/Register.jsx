@@ -26,11 +26,11 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
-  // const BASE_URL =
-  //   window.location.hostname === "localhost"
-  //     ? "http://localhost:5000"
-  //     : "https://user-dashboard-backend-jade.vercel.app";
+  // const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
+  const BASE_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://user-dashboard-backend-jade.vercel.app";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -62,7 +62,11 @@ export default function Register() {
     formData.append("image", image);
 
     try {
-      await axios.post(`${BASE_URL}/api/auth/register`, formData);
+      await axios.post(`${BASE_URL}/api/auth/register`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       navigate("/login", {
         state: { successMsg: "Account created successfully!" },
       });
