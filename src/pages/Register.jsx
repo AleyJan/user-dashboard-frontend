@@ -26,10 +26,11 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const BASE_URL =
-    window.location.hostname === "localhost"
-      ? "http://localhost:5000"
-      : "https://user-dashboard-backend-jade.vercel.app";
+  const BASE_URL = "https://user-dashboard-backend-jade.vercel.app";
+  // const BASE_URL =
+  //   window.location.hostname === "localhost"
+  //     ? "http://localhost:5000"
+  //     : "https://user-dashboard-backend-jade.vercel.app";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
